@@ -9,6 +9,9 @@ project:
   exclude:
     - legacy/**
     - _build/**
+  # Equations carry named tags (\tag{EE} etc.), so no automatic numbering
+  numbering:
+    equation: false
   # LaTeX macros available in every page
   math:
     '\E': '\mathbb{E}'
