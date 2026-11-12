@@ -3,7 +3,8 @@
 Household:  max  int_0^inf e^{-rho t} [ ln C - L^{1+1/eta} / (1+1/eta) ] dt
             s.t. dA/dt = r A + W L - C - T
 Firm:       Y = Z K^alpha L^{1-alpha},   dK/dt = I - delta K
-Government: G = T (lump-sum taxes, wasteful spending)
+Government: G = T (lump-sum taxes, wasteful spending). The baseline model of
+            Lecture 2 has no government (sg = 0); Lecture 3 adds it.
 
 Equilibrium dynamics in (K, lambda), where lambda = 1/C is the marginal utility of wealth:
 
@@ -11,7 +12,7 @@ Equilibrium dynamics in (K, lambda), where lambda = 1/C is the marginal utility 
     dlambda/dt = lambda * (rho + delta - alpha Z K^{alpha-1} L^{1-alpha})
     L          = [lambda (1-alpha) Z K^alpha]^{1/(1/eta + alpha)}     (labor market)
 
-Time is measured in quarters, so rho and delta are quarterly rates.
+Time is measured in years, so rho, delta and all other rates are annual rates.
 
 Linearized system (hats = log deviations; g = (G - G_ss)/Y_ss):
 
@@ -32,10 +33,10 @@ import pandas as pd
 @dataclass(frozen=True)
 class Params:
     alpha: float = 1 / 3     # capital share
-    rho: float = 0.01        # discount rate (quarterly): beta = e^{-rho} ~ 0.99
-    delta: float = 0.02      # depreciation (quarterly), ~8% per year
+    rho: float = 0.04        # discount rate (annual): real rate 4% per year
+    delta: float = 0.08      # depreciation (annual)
     eta: float = 1.0         # Frisch elasticity of labor supply
-    sg: float = 0.20         # steady-state G/Y
+    sg: float = 0.0          # steady-state G/Y (0 = no government, the Lecture 2 baseline)
     Z: float = 1.0           # steady-state TFP
 
     @property
@@ -148,6 +149,26 @@ def stable_arm_slope(p: Params) -> float:
     return P[1, 0] / P[0, 0]
 
 
+def policy_coefficients(p: Params, theta: float = 0.0) -> dict:
+    """Method of undetermined coefficients for a TFP shock z_t = z_0 e^{-theta t}.
+
+    Guess lam_t = nu_lk k_t + nu_lz z_t. Matching coefficients gives
+        A12 nu_lk^2 + (A11 - A22) nu_lk - A21 = 0      (pick the stable root)
+        nu_lz = (nu_lk b1 - b2) / (mu_u + theta)
+    and capital follows  k_dot = mu_s k + nu_kz z  with mu_s = A11 + A12 nu_lk.
+    """
+    A, B = linear_system(p)
+    b = B[:, 0]
+    a11, a12, a21, a22 = A[0, 0], A[0, 1], A[1, 0], A[1, 1]
+    disc = np.sqrt((a11 - a22) ** 2 + 4 * a12 * a21)
+    nu_lk = (a22 - a11 - disc) / (2 * a12)
+    mu_s = a11 + a12 * nu_lk
+    mu_u = a11 + a22 - mu_s
+    nu_lz = (nu_lk * b[0] - b[1]) / (mu_u + theta)
+    nu_kz = b[0] + a12 * nu_lz
+    return dict(nu_lk=nu_lk, nu_lz=nu_lz, mu_s=mu_s, mu_u=mu_u, nu_kz=nu_kz)
+
+
 def loci(p: Params, k, z=0.0, g=0.0):
     """lam values on the k_dot = 0 and lam_dot = 0 loci for a grid of k (linearized)."""
     A, B = linear_system(p)
@@ -160,7 +181,7 @@ def loci(p: Params, k, z=0.0, g=0.0):
 # ---------------------------------------------------------------------------
 # Impulse responses (linearized, closed form)
 # ---------------------------------------------------------------------------
-def irf(p: Params, z0=0.0, g0=0.0, theta_z=0.0, theta_g=0.0, T=60, n=601, k0=0.0) -> pd.DataFrame:
+def irf(p: Params, z0=0.0, g0=0.0, theta_z=0.0, theta_g=0.0, T=25, n=601, k0=0.0) -> pd.DataFrame:
     """Linearized response to unanticipated shocks at t=0:
 
         z(t) = z0 exp(-theta_z t),   g(t) = g0 exp(-theta_g t).
@@ -202,17 +223,17 @@ def derived(p: Params, t, k, lam, z, g) -> pd.DataFrame:
     kdot = A[0, 0] * k + A[0, 1] * lam + B[0, 0] * z + B[0, 1] * g
     i = (kdot + d * k) / d                       # dI/I = (dK_dot + delta dK)/(delta K)
     w = y - l
-    r = (rho + d) * (y - k)                      # dr = d(MPK) = (rho+delta)(y-k), quarterly rate
+    r = (rho + d) * (y - k)                      # dr = d(MPK) = (rho+delta)(y-k), annual rate
     df = pd.DataFrame({"K": k, "lambda": lam, "C": c, "L": l, "Y": y, "I": i, "W": w,
                        "Z": z, "G/Y": g}, index=pd.Index(t, name="t")) * 100
-    df["r (ann. p.p.)"] = 400 * r                # annualized, percentage points
+    df["r (p.p.)"] = 100 * r                     # percentage points per year
     return df
 
 
 # ---------------------------------------------------------------------------
 # Nonlinear transition (to verify the linear solution)
 # ---------------------------------------------------------------------------
-def nonlinear_path(p: Params, Zpath, Gpath, T=200, n=2001):
+def nonlinear_path(p: Params, Zpath, Gpath=None, T=75, n=2001):
     """Perfect-foresight nonlinear transition from the old steady state after an
     unanticipated change in the paths Z(t), G(t) (callables). Solved as a two-point
     boundary value problem: K(0) = K_ss (predetermined) and lambda(T) = new steady state.
@@ -220,6 +241,8 @@ def nonlinear_path(p: Params, Zpath, Gpath, T=200, n=2001):
     from scipy.integrate import solve_bvp
 
     ss0 = steady_state(p)
+    if Gpath is None:                                # spending constant at its steady-state level
+        Gpath = lambda t: ss0["G"] + 0 * np.asarray(t, dtype=float)
     ssT = steady_state(p, Z=Zpath(T), G=Gpath(T))
     t = np.linspace(0, T, n)
 
