@@ -2,12 +2,12 @@
 
 Lecture notes with runnable code. **Read them as a website: <https://johanneswieland.github.io/RBC/>**
 
- Every number and figure in the lectures is produced by the code next to it, so you can rerun it, change the assumptions, and see how the results are obtained.
+Every number and figure in the lectures is produced by the code next to it, so you can rerun it, change the assumptions, and see how the results are obtained.
 
 | # | Lecture | Notebook |
 |---|---------|----------|
 | 1 | Business cycle facts | [`lectures/01_business_cycle_facts.ipynb`](lectures/01_business_cycle_facts.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/johanneswieland/RBC/blob/main/lectures/01_business_cycle_facts.ipynb) |
-| 2 | The RBC model in continuous time | *coming soon* |
+| 2 | The RBC model in continuous time | [`lectures/02_rbc_continuous_time.ipynb`](lectures/02_rbc_continuous_time.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/johanneswieland/RBC/blob/main/lectures/02_rbc_continuous_time.ipynb) |
 
 ## Running the notebooks
 

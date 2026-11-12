@@ -18,6 +18,7 @@ project:
     - title: Lectures
       children:
         - file: lectures/01_business_cycle_facts.ipynb
+        - file: lectures/02_rbc_continuous_time.ipynb
 site:
   template: book-theme
   options:
