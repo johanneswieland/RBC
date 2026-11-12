@@ -30,6 +30,7 @@ SNAPSHOT = Path(__file__).resolve().parent.parent / "data" / "bcdata_snapshot.cs
 
 # FRED code -> short name.  "pc" = already per capita (chained 2017 $ per person).
 FRED_SERIES = {
+    "A939RX0Q048SBEA": "GDP_pc_nipa",       # real GDP per capita, chained 2017 $ (NIPA)
     "A796RX0Q048SBEA": "C_nondurables_pc",  # real PCE nondurables per capita
     "A797RX0Q048SBEA": "C_services_pc",     # real PCE services per capita
     "A795RX0Q048SBEA": "C_durables_pc",     # real PCE durables per capita
