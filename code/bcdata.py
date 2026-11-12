@@ -44,7 +44,8 @@ FRED_SERIES = {
 }
 
 # Fernald growth rates (annualized % log changes) that we cumulate into levels.
-FERNALD_SERIES = {"dY": "Y_business", "dhours": "hours", "dk": "capital"}
+FERNALD_SERIES = {"dY": "Y_business", "dhours": "hours", "dk": "capital",
+                  "dtfp_util": "tfp_util"}  # utilization-adjusted TFP (Basu-Fernald-Kimball)
 
 # Capital share used for the Solow residual.
 ALPHA = 0.35
@@ -161,6 +162,8 @@ def build_series(raw: pd.DataFrame) -> pd.DataFrame:
 
     # Solow residual (per-capita normalization cancels because shares sum to 1)
     df["TFP"] = df["GDP"] - ALPHA * df["Capital"] - (1 - ALPHA) * df["Hours"]
+    # Fernald's utilization-adjusted TFP (log level, normalized to 0 in 1947Q1)
+    df["TFP (util-adj)"] = raw["log_tfp_util"]
 
     df["recession"] = raw["recession"]
     return df.dropna()
