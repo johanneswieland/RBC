@@ -13,10 +13,7 @@ concurrency:
   group: pages
   cancel-in-progress: false
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -34,5 +31,14 @@ jobs:
       - uses: actions/upload-pages-artifact@v5
         with:
           path: ./_build/html
+  # Separate job (GitHub's recommended layout): the artifact is fully registered
+  # before deploy-pages looks it up, which avoids "No artifacts named github-pages".
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-24.04
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v5
