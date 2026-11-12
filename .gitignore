@@ -1,0 +1,14 @@
+# local-only material
+legacy/
+.venv/
+.DS_Store
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+# LaTeX build files
+*.aux
+*.log
+*.synctex.gz
+*.pdfsync
+*.out
+*.toc
