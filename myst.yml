@@ -1,0 +1,24 @@
+# Jupyter Book 2 (MyST) configuration. Build locally with:  jupyter-book start   (or: jupyter-book build --html)
+version: 1
+project:
+  title: "Economics 210A: Business Cycles"
+  description: Lecture notes with runnable code for a graduate course on business cycles.
+  authors:
+    - name: Johannes Wieland
+  github: https://github.com/johanneswieland/RBC
+  exclude:
+    - legacy/**
+    - _build/**
+  # LaTeX macros available in every page
+  math:
+    '\E': '\mathbb{E}'
+    '\share': '\frac{\bar{#1}}{\bar{#2}}'
+  toc:
+    - file: README.md
+    - title: Lectures
+      children:
+        - file: lectures/01_business_cycle_facts.ipynb
+site:
+  template: book-theme
+  options:
+    logo_text: Econ 210A

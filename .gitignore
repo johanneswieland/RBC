@@ -12,3 +12,5 @@ __pycache__/
 *.pdfsync
 *.out
 *.toc
+# Jupyter Book build output
+_build/
