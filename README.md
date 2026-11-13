@@ -8,6 +8,7 @@ Every number and figure in the lectures is produced by the code next to it, so y
 |---|---------|----------|
 | 1 | Business cycle facts | [`lectures/01_business_cycle_facts.ipynb`](lectures/01_business_cycle_facts.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/johanneswieland/RBC/blob/main/lectures/01_business_cycle_facts.ipynb) |
 | 2 | The basic RBC model in continuous time | [`lectures/02_rbc_continuous_time.ipynb`](lectures/02_rbc_continuous_time.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/johanneswieland/RBC/blob/main/lectures/02_rbc_continuous_time.ipynb) |
+| 3 | Comparative statics: phase diagrams and shocks | [`lectures/03_comparative_statics.ipynb`](lectures/03_comparative_statics.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/johanneswieland/RBC/blob/main/lectures/03_comparative_statics.ipynb) |
 
 ## Running the notebooks
 

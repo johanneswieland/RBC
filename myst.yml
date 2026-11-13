@@ -22,6 +22,7 @@ project:
       children:
         - file: lectures/01_business_cycle_facts.ipynb
         - file: lectures/02_rbc_continuous_time.ipynb
+        - file: lectures/03_comparative_statics.ipynb
 site:
   template: book-theme
   options:

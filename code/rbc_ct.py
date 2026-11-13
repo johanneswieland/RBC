@@ -212,6 +212,39 @@ def irf(p: Params, z0=0.0, g0=0.0, theta_z=0.0, theta_g=0.0, T=25, n=601, k0=0.0
     return derived(p, t, k, lam, z, g)
 
 
+def irf_step(p: Params, z0=0.0, g0=0.0, t1=np.inf, T=25, n=601, k0=0.0) -> pd.DataFrame:
+    """Linearized response to an unanticipated step in (z, g) at t=0 that lasts until t1
+    (t1 = inf: permanent). The return of the shock to zero at t1 is anticipated.
+
+    In eigen-coordinates w = P^{-1} x of the ORIGINAL dynamics, with beta = P^{-1} B s:
+      unstable: w_u must be 0 from t1 on (stable arm of the original system), so for t < t1
+                w_u(t) = -(beta_u/mu_u) (1 - e^{mu_u (t - t1)})        (permanent: -beta_u/mu_u)
+      stable:   w_s(0) set by k(0) = k0;  w_s(t) = w_s* + (w_s(0) - w_s*) e^{mu_s t} for t < t1,
+                w_s(t) = w_s(t1) e^{mu_s (t - t1)} after,   w_s* = -beta_s/mu_s.
+    The time grid contains t1 twice (just before and just after the shock ends) so jumps plot correctly.
+    """
+    A, B = linear_system(p)
+    mu_s, mu_u, P = saddle(A)
+    beta = np.linalg.inv(P) @ (B @ np.array([z0, g0]))
+    t = np.linspace(0, T, n)
+    on = np.ones_like(t, dtype=bool)
+    if np.isfinite(t1) and t1 < T:
+        t = np.sort(np.append(t[t != t1], [t1, t1]))
+        on = t < t1
+        on[np.searchsorted(t, t1)] = True        # first copy of t1: shock still on (left limit)
+    wu = np.where(on, -(beta[1] / mu_u) * (1 - (np.exp(mu_u * (t - t1)) if np.isfinite(t1) else 0.0)), 0.0)
+    ws_star = -beta[0] / mu_s
+    ws0 = (k0 - P[0, 1] * wu[0]) / P[0, 0]
+    ws_on = ws_star + (ws0 - ws_star) * np.exp(mu_s * np.minimum(t, t1 if np.isfinite(t1) else np.inf))
+    if np.isfinite(t1):
+        ws_t1 = ws_star + (ws0 - ws_star) * np.exp(mu_s * t1)
+        ws = np.where(t <= t1, ws_on, ws_t1 * np.exp(mu_s * (t - t1)))
+    else:
+        ws = ws_on
+    k, lam = P @ np.vstack([ws, wu])
+    return derived(p, t, k, lam, np.where(on, z0, 0.0), np.where(on, g0, 0.0))
+
+
 def derived(p: Params, t, k, lam, z, g) -> pd.DataFrame:
     """Log deviations (x100 = %) of all variables from the linearized state (k, lam, z, g)."""
     a, phi, rho, d = p.alpha, p.phi, p.rho, p.delta
