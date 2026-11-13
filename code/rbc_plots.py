@@ -305,32 +305,85 @@ def phase_diagram(ax, p, z=0.0, g=0.0, z_new=None, g_new=None, path=None, t1=Non
     return ax
 
 
-def labor_market(ax, p, path, t=0.0, lim=None, label="impact"):
-    """Labor market in (l_hat, w_hat), in %: initial curves and curves at date t of path.
+def labor_market(ax, p, path, t=0.0, lim=None, when=r"t_0", pad=1.6, label=None):
+    """Labor market in (log L, log W), drawn like the labor-market figures of the notes: initial
+    curves (solid) and curves at date t of `path` (dashed), labelled directly, with the initial
+    steady state and the equilibrium at t marked on the axes. Log deviations in %.
 
     Labor supply (Lecture 2, (LS) and (HH-FOC)):  w = l/eta - lambda
     Labor demand (Lecture 2, (LD)):               w = z + alpha k - alpha l
+    `label` is accepted for backward compatibility and ignored.
     """
     row = path.loc[t]
     row = row.iloc[-1] if row.ndim > 1 else row          # right limit if t appears twice
-    if lim is None:                                      # window around the old and new equilibrium
-        span = max(abs(row["L"]), abs(row["W"]), 0.2)
-        lim = (-1.6 * span, 1.6 * span, -1.6 * span, 1.6 * span)
-    lmin, lmax, wmin, wmax = lim
     a, eta = p.alpha, p.eta
-    lg = np.linspace(lmin, lmax, 50)
     k, lam, z = row["K"], row["lambda"], row["Z"]
-    ax.plot(lg, lg / eta, color=COLORS["gdp"], lw=1.6, label=r"$L^s$ (initial)")
-    ax.plot(lg, -a * lg, color=COLORS["series"], lw=1.6, label=r"$L^d$ (initial)")
+    new = (row["L"], row["W"])
+    if lim is None:                                      # centred between the old and the new point
+        c = np.array(new) / 2
+        h = max(abs(new[0]), abs(new[1]), 0.1) / 2 * pad + 0.15 * max(abs(new[0]), abs(new[1]), 0.1)
+        lim = (c[0] - h, c[0] + h, c[1] - h, c[1] + h)
+    lmin, lmax, wmin, wmax = lim
+    lg = np.linspace(lmin, lmax, 200)
+    taken = [_norm(lim, 0, 0), _norm(lim, *new)]
+
+    # time subscripts on the curve labels: K and Z at date t (K is predetermined on impact)
+    Kt = r"\bar K" if abs(k) < 1e-9 else rf"K_{{{when}}}"
+    Zt = r"\bar Z" if abs(z) < 1e-9 else rf"Z_{{{when}}}"
+    curves = [(lg / eta, r"$L^s(\bar\lambda)$", "-", "s"), (-a * lg, r"$L^d(\bar K, \bar Z)$", "-", "d")]
     if abs(lam) > 1e-9:
-        ax.plot(lg, lg / eta - lam, color=COLORS["gdp"], lw=1.6, ls="--", label=fr"$L^s$ ({label})")
+        curves.append((lg / eta - lam, rf"$L^s(\lambda_{{{when}}})$", "--", "s"))
     if abs(z + a * k) > 1e-9:
-        ax.plot(lg, z + a * k - a * lg, color=COLORS["series"], lw=1.6, ls="--", label=fr"$L^d$ ({label})")
-    ax.plot(0, 0, "o", color=COLORS["text"], ms=5)
-    ax.plot(row["L"], row["W"], "o", color=PATH, ms=7)
-    ax.axhline(0, color="0.8", lw=0.6); ax.axvline(0, color="0.8", lw=0.6)
+        curves.append((z + a * k - a * lg, rf"$L^d({Kt}, {Zt})$", "--", "d"))
+    for y, lab, ls, kind in curves:
+        ax.plot(lg, y, color=LOCUS, lw=1.8, ls=ls)
+        kw = dict(fracs=(0.93, 0.8, 0.65, 0.35), offset=(7, 0), va="center") if kind == "s" else {}
+        _end_label(ax, lg, y, lab, lim, LOCUS, taken, **kw)
+
+    # arrows showing the shifts, where both the old and the new curve are well inside the window
+    for kind, prefs in (("s", (0.8, 0.65, 0.5, 0.35, 0.2)), ("d", (0.2, 0.35, 0.5, 0.65, 0.8))):
+        olds = [c for c in curves if c[3] == kind and c[2] == "-"]
+        news = [c for c in curves if c[3] == kind and c[2] == "--"]
+        if not news:
+            continue
+        for f in prefs:
+            i = np.searchsorted(lg, lmin + f * (lmax - lmin))
+            y0, y1 = olds[0][0][i], news[0][0][i]
+            lo, hi = wmin + 0.06 * (wmax - wmin), wmax - 0.06 * (wmax - wmin)
+            if lo < y0 < hi and lo < y1 < hi and abs(lg[i] - new[0]) > 0.1 * (lmax - lmin):
+                ax.annotate("", xy=(lg[i], y1), xytext=(lg[i], y0),
+                            arrowprops=dict(arrowstyle="-|>", color=GUIDE, lw=1.2, mutation_scale=12,
+                                            shrinkA=2, shrinkB=2))
+                break
+
+    # steady state and the equilibrium at t, with named ticks and dotted guide lines
+    for (gl, gw) in [(0.0, 0.0), new]:
+        ax.plot([gl, gl], [wmin, gw], color=GUIDE, lw=0.7, ls=":")
+        ax.plot([lmin, gl], [gw, gw], color=GUIDE, lw=0.7, ls=":")
+    ax.plot(0, 0, "o", color=COLORS["text"], ms=6, zorder=5)
+    ax.plot(*new, "o", color=PATH, ms=8, zorder=5)
+    xt, xl = [0.0, new[0]], [r"$\bar L$", rf"$L_{{{when}}}$"]
+    yt, yl = [0.0, new[1]], [r"$\bar W$", rf"$W_{{{when}}}$"]
+
+    def thin(ticks, labels, span):
+        keep_t, keep_l = [], []
+        for t_, l_ in zip(ticks, labels):
+            if all(abs(t_ - u) > 0.005 * span for u in keep_t):
+                keep_t.append(t_); keep_l.append(l_)
+        return keep_t, keep_l
+    ax.set_xticks(*thin(xt, xl, lmax - lmin)); ax.set_yticks(*thin(yt, yl, wmax - wmin))
+    ax.tick_params(length=0, labelsize=11, colors=COLORS["text"])
+    # two close ticks: push their labels apart
+    xs_ = ax.get_xticks()
+    if len(xs_) == 2 and abs(xs_[1] - xs_[0]) < 0.1 * (lmax - lmin):
+        labs = ax.get_xticklabels(); order = np.argsort(xs_)
+        labs[order[0]].set_ha("right"); labs[order[1]].set_ha("left")
+    ys_ = ax.get_yticks()
+    if len(ys_) == 2 and abs(ys_[1] - ys_[0]) < 0.06 * (wmax - wmin):
+        labs = ax.get_yticklabels(); order = np.argsort(ys_)
+        labs[order[0]].set_va("top"); labs[order[1]].set_va("bottom")
     ax.set_xlim(lmin, lmax); ax.set_ylim(wmin, wmax)
-    ax.set_xlabel(r"hours $\hat l_t$ (%)"); ax.set_ylabel(r"real wage $\hat w_t$ (%)")
+    ax.set_xlabel(r"hours $L_t$ (log scale)"); ax.set_ylabel(r"real wage $W_t$ (log scale)")
     ax.grid(False)
     return ax
 
