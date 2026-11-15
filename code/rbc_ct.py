@@ -295,3 +295,113 @@ def nonlinear_path(p: Params, Zpath, Gpath=None, T=75, n=2001):
     K, lam = np.exp(sol.sol(t))
     al = allocations(K, lam, Zpath(t), Gpath(t), p)
     return pd.DataFrame(al, index=pd.Index(t, name="t")), ss0
+
+
+# ---------------------------------------------------------------------------
+# Stochastic simulation (Lecture 4)
+# ---------------------------------------------------------------------------
+def shock_process(theta_z=None, theta_g=None, theta_dz=None) -> dict:
+    """Exogenous states s with  ds = Phi s dt + S dW  (dW: independent standard Brownian motions)
+    and forcing (z, g)' = M s. Pass the processes that are present:
+
+      theta_z : z is an Ornstein-Uhlenbeck process, dz = -theta_z z dt + dW  (theta_z = 0: random walk)
+      theta_dz: z is integrated, dz = x dt, and its growth rate is OU, dx = -theta_dz x dt + dW
+                (the continuous-time analogue of an ARIMA(1,1,0) process for log TFP)
+      theta_g : g is OU, dg = -theta_g g dt + dW
+
+    The volatilities (one per Brownian motion, in the order z, g) are passed to `simulate`.
+    """
+    blocks, M_rows, names = [], [], []
+    if theta_z is not None and theta_dz is not None:
+        raise ValueError("give theta_z or theta_dz, not both")
+    if theta_z is not None:
+        blocks.append((np.array([[-theta_z]]), np.array([[1.0]])))
+        names.append("z")
+    if theta_dz is not None:
+        blocks.append((np.array([[0.0, 1.0], [0.0, -theta_dz]]), np.array([[0.0], [1.0]])))
+        names += ["z", "dz"]
+    if theta_g is not None:
+        blocks.append((np.array([[-theta_g]]), np.array([[1.0]])))
+        names.append("g")
+    n = sum(b[0].shape[0] for b in blocks)
+    Phi, S = np.zeros((n, n)), np.zeros((n, len(blocks)))
+    i = 0
+    for j, (Pb, Sb) in enumerate(blocks):
+        m = Pb.shape[0]
+        Phi[i:i + m, i:i + m], S[i:i + m, j] = Pb, Sb[:, 0]
+        i += m
+    M = np.zeros((2, n))
+    if "z" in names:
+        M[0, names.index("z")] = 1.0
+    if "g" in names:
+        M[1, names.index("g")] = 1.0
+    return dict(Phi=Phi, S=S, M=M, names=names)
+
+
+def state_space(p: Params, proc: dict):
+    """Linear state-space form of the model with stochastic exogenous states s.
+
+    Guess lam = nu_lk k + N s. Matching coefficients (as in `policy_coefficients`, with
+    E[ds] = Phi s dt in place of -theta z dt) gives  N = (b_2 - nu_lk b_1)(Phi - mu_u I)^{-1},
+    where b_1, b_2 are the rows of B M. The state X = (k, s) then follows
+        dX = F X dt + S_X dW,     and (k, lam, z, g)' = C X.
+    """
+    A, B = linear_system(p)
+    mu_s, mu_u, P = saddle(A)
+    nu = P[1, 0] / P[0, 0]
+    Phi, S, M = proc["Phi"], proc["S"], proc["M"]
+    n = Phi.shape[0]
+    Bs = B @ M
+    N = (Bs[1] - nu * Bs[0]) @ np.linalg.inv(Phi - mu_u * np.eye(n))
+    F = np.zeros((n + 1, n + 1))
+    F[0, 0], F[0, 1:], F[1:, 1:] = mu_s, A[0, 1] * N + Bs[0], Phi
+    SX = np.vstack([np.zeros((1, S.shape[1])), S])
+    C = np.zeros((4, n + 1))
+    C[0, 0], C[1, 0], C[1, 1:], C[2:, 1:] = 1.0, nu, N, M
+    return F, SX, C
+
+
+def discretize(F, SX, h=0.25):
+    """Exact discretization of dX = F X dt + SX dW at interval h (Van Loan, 1978):
+    X_{t+h} = Ad X_t + e_{t+h},  Var(e) = Qd."""
+    from scipy.linalg import expm
+    n = F.shape[0]
+    E = expm(np.block([[-F, SX @ SX.T], [np.zeros((n, n)), F.T]]) * h)
+    Ad = E[n:, n:].T
+    Qd = Ad @ E[:n, n:]
+    return Ad, (Qd + Qd.T) / 2
+
+
+def loadings(p: Params) -> pd.DataFrame:
+    """Rows: unit values of (k, lam, z, g); columns: the variables of `derived` (x100)."""
+    return derived(p, np.arange(4), *np.eye(4)).set_axis(["k", "lam", "z", "g"])
+
+
+def simulate(p: Params, proc: dict, sigma, quarters: int, n_sim: int = 1, burn: int = 400,
+             seed: int = 0, states: bool = False):
+    """Simulate the linearized model at quarterly frequency (time measured in years, h = 1/4).
+
+    sigma: instantaneous volatility of each Brownian motion (order z, g as in `shock_process`).
+    Returns a DataFrame of % deviations (as in `derived`) indexed by quarter, or a list of
+    n_sim DataFrames. With states=True also returns the simulated states X (quarters x n_sim x nX).
+    """
+    F, SX, C = state_space(p, proc)
+    SX = SX * np.atleast_1d(np.asarray(sigma, dtype=float))
+    Ad, Qd = discretize(F, SX, 0.25)
+    w, V = np.linalg.eigh(Qd)
+    L = V * np.sqrt(np.clip(w, 0, None))
+    rng = np.random.default_rng(seed)
+    nX = F.shape[0]
+    X = np.zeros((n_sim, nX))
+    out = np.empty((quarters, n_sim, nX))
+    for t in range(burn + quarters):
+        X = X @ Ad.T + rng.standard_normal((n_sim, nX)) @ L.T
+        if t >= burn:
+            out[t - burn] = X
+    q = np.arange(quarters)
+    dfs = []
+    for j in range(n_sim):
+        k, lam, z, g = C @ out[:, j, :].T
+        dfs.append(derived(p, q, k, lam, z, g).rename_axis("quarter"))
+    res = dfs[0] if n_sim == 1 else dfs
+    return (res, out) if states else res

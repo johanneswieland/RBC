@@ -35,6 +35,7 @@ FRED_SERIES = {
     "A797RX0Q048SBEA": "C_services_pc",     # real PCE services per capita
     "A795RX0Q048SBEA": "C_durables_pc",     # real PCE durables per capita
     "GPDIC1": "I_private",                  # real gross private domestic investment, bn $
+    "GCEC1": "G_real",                      # real government consumption + gross investment, bn $
     "COMPRNFB": "real_wage",                # real hourly compensation, nonfarm business (index)
     "TB3MS": "tbill",                       # 3-month T-bill rate, % p.a. (monthly)
     "GDPDEF": "gdp_deflator",               # GDP implicit price deflator (index)
