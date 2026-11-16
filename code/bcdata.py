@@ -48,7 +48,7 @@ FRED_SERIES = {
 FERNALD_SERIES = {"dY": "Y_business", "dhours": "hours", "dk": "capital"}
 
 # Capital share used for the Solow residual.
-ALPHA = 0.35
+ALPHA = 1 / 3   # capital share, as in the model (Lecture 2)
 
 
 # ---------------------------------------------------------------------------

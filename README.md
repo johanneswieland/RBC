@@ -1,10 +1,10 @@
 # Economics 210A: Real Business Cycles
 
-The course is a brief overview of the Real Business Cycle framework. This framework forms the backbone of modern business cycle analysis as a minimal model of short-run fluctuations that is consistent with optimizing behavior and rational expectations. The model itself is obviously unrealistic but by studying it we will be able to better understand more realistic models that build on it. It is also in some respect remarkably successful at matching certain aspects of the data and we will work through the reasons for this success. An outlines of the themes we cover is below.
+The course is a brief overview of the Real Business Cycle framework. This framework forms the backbone of modern business cycle analysis as a minimal model of short-run fluctuations that is consistent with optimizing behavior and rational expectations. The model itself is obviously unrealistic, but by studying it we will be able to better understand more realistic models that build on it. It is also in some respects remarkably successful at matching certain aspects of the data and we will work through the reasons for this success. An outline of the themes we cover is below.
 
-# Lectures
+## Lectures
 
-Monday, Wednesday: 10:30-11:50am, Malk Hall 5xx
+Monday, Wednesday: 10:30-11:50am, Malk Hall 520
 
 | # | Lecture | Notebook |
 |---|---------|----------|
@@ -51,6 +51,7 @@ Data are downloaded at run time from [FRED](https://fred.stlouisfed.org) and Joh
 The website is a [Jupyter Book](https://jupyterbook.org) built from the committed notebooks (configuration in `myst.yml`). It is rebuilt and published to GitHub Pages automatically on every push to `main`. To preview it locally (requires Node.js):
 ```bash
 pip install "jupyter-book>=2"
-jupyter-book start -->
+jupyter-book start
 ```
+-->
 

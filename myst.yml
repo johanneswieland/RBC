@@ -1,7 +1,7 @@
 # Jupyter Book 2 (MyST) configuration. Build locally with:  jupyter-book start   (or: jupyter-book build --html)
 version: 1
 project:
-  title: "Economics 210A: Business Cycles"
+  title: "Economics 210A: Real Business Cycles"
   description: Lecture notes with runnable code for a graduate course on business cycles.
   authors:
     - name: Johannes Wieland
