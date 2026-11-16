@@ -23,6 +23,10 @@ Each lecture comes with a set of questions. I highly recommend you do all of the
 3. Lecture 3, Q2
 4. Lecture 4, Q3 & Q5
 
+## Grading
+
+The grading is explained in the class syllabus on Canvas. For my exam parts I will use FERPA compliant AI-assisted grading. AI will be used to develop a rubric and as a second grader. AI will not be used to assign final grades.
+
 ## Running the notebooks
 
 **In the browser (no installation):** click the *Open in Colab* badge.
