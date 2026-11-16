@@ -15,29 +15,13 @@ Monday, Wednesday: 10:30-11:50am, Malk Hall 5xx
 
 **Read them as a website: <https://johanneswieland.github.io/RBC/>**
 
-## Readings
+## Problem Set
 
-Starred readings (\*) are required; the others are recommended.
-
-**Business cycle facts** (Lecture 1)
-
-- \* King, Robert G. and Sergio T. Rebelo (1999). "[Resuscitating Real Business Cycles](https://doi.org/10.1016/S1574-0048%2899%2910022-3)." In *Handbook of Macroeconomics* 1B: 927–1007.
-- Stock, James H. and Mark W. Watson (1999). "[Business Cycle Fluctuations in U.S. Macroeconomic Time Series](https://doi.org/10.1016/S1574-0048%2899%2901004-6)." In *Handbook of Macroeconomics* 1A: 3–64.
-
-**Real business cycle model: review, criticisms, and business cycle accounting** (Lectures 2–4)
-
-- \* King, Robert G. and Sergio T. Rebelo (1999). "[Resuscitating Real Business Cycles](https://doi.org/10.1016/S1574-0048%2899%2910022-3)." In *Handbook of Macroeconomics* 1B: 927–1007.
-- \* Prescott, Edward C. (1986). "[Theory Ahead of Business Cycle Measurement](https://www.minneapolisfed.org/research/quarterly-review/theory-ahead-of-business-cycle-measurement)." *Federal Reserve Bank of Minneapolis Quarterly Review* 10(4): 9–22.
-- \* Summers, Lawrence H. (1986). "[Some Skeptical Observations on Real Business Cycle Theory](https://www.minneapolisfed.org/research/quarterly-review/some-skeptical-observations-on-real-business-cycle-theory)." *Federal Reserve Bank of Minneapolis Quarterly Review* 10(4): 23–27.
-- \* Prescott, Edward C. (1986). "[Response to a Skeptic](https://www.minneapolisfed.org/research/quarterly-review/response-to-a-skeptic)." *Federal Reserve Bank of Minneapolis Quarterly Review* 10(4): 28–33.
-- Chetty, Raj, Adam Guren, Day Manoli, and Andrea Weber (2013). "[Does Indivisible Labor Explain the Difference between Micro and Macro Elasticities? A Meta-Analysis of Extensive Margin Elasticities](https://doi.org/10.1086/669170)." *NBER Macroeconomics Annual* 27: 1–56.
-- Galí, Jordi (1999). "[Technology, Employment, and the Business Cycle: Do Technology Shocks Explain Aggregate Fluctuations?](https://doi.org/10.1257/aer.89.1.249)" *American Economic Review* 89(1): 249–271.
-- Basu, Susanto, John G. Fernald, and Miles S. Kimball (2006). "[Are Technology Improvements Contractionary?](https://doi.org/10.1257/aer.96.5.1418)" *American Economic Review* 96(5): 1418–1448.
-- Rotemberg, Julio J. and Michael Woodford (1996). "[Real-Business-Cycle Models and the Forecastable Movements in Output, Hours, and Consumption](https://www.jstor.org/stable/2118256)." *American Economic Review* 86(1): 71–89.
-- Galí, Jordi, Mark Gertler, and J. David López-Salido (2007). "[Markups, Gaps, and the Welfare Costs of Business Fluctuations](https://doi.org/10.1162/rest.89.1.44)." *Review of Economics and Statistics* 89(1): 44–59.
-- Chari, V. V., Patrick J. Kehoe, and Ellen R. McGrattan (2007). "[Business Cycle Accounting](https://doi.org/10.1111/j.1468-0262.2007.00768.x)." *Econometrica* 75(3): 781–836.
-- Shimer, Robert (2009). "[Convergence in Macroeconomics: The Labor Wedge](https://doi.org/10.1257/mac.1.1.280)." *American Economic Journal: Macroeconomics* 1(1): 280–297.
-- Bils, Mark, Peter J. Klenow, and Benjamin A. Malin (2018). "[Resurrecting the Role of the Product Market Wedge in Recessions](https://doi.org/10.1257/aer.20151260)." *American Economic Review* 108(4–5): 1118–1146.
+Each lecture comes with a set of questions. I highly recommend you do all of them. The graded problem set consists of a subset:
+1. Lecture 1, Q6
+2. Lecture 2, Q2
+3. Lecture 3, Q2
+4. Lecture 4, Q3 & Q5
 
 ## Running the notebooks
 
