@@ -36,7 +36,7 @@ pip install -r requirements.txt
 jupyter lab
 ```
 
-<!-- ## Repository layout
+## Repository layout
 
 ```
 lectures/   one notebook per lecture (derivations + code + output)
@@ -53,5 +53,3 @@ The website is a [Jupyter Book](https://jupyterbook.org) built from the committe
 pip install "jupyter-book>=2"
 jupyter-book start
 ```
--->
-
