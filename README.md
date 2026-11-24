@@ -2,6 +2,13 @@
 
 The course is a brief overview of the Real Business Cycle framework. This framework forms the backbone of modern business cycle analysis as a minimal model of short-run fluctuations that is consistent with optimizing behavior and rational expectations. The model itself is obviously unrealistic, but by studying it we will be able to better understand more realistic models that build on it. It is also in some respects remarkably successful at matching certain aspects of the data and we will work through the reasons for this success. An outline of the themes we cover is below.
 
+## Course Objectives
+
+1. Know key empirical patterns of business cycle.
+2. Understand the economics of the optimality conditions of firms and households in the RBC model. This helps understand extensions in richer models, as well as areas where those models fall back on this simpler setup.
+3. Solve the RBC model qualitatively with the aid of a phase diagram and equilibrium equations. These tools can be applied to any dynamics GE model when there are two (co-)state variables. 
+4. Understand how the RBC model performs quantitatively. Calibration and (conditional) model evaluation are important tools that are used across a range of dynamic equqilibrium model.
+
 ## Lectures
 
 Monday, Wednesday: 10:30-11:50am, Malk Hall 520
